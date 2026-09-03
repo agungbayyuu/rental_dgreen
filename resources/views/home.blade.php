@@ -55,10 +55,11 @@
                 </div>
             </div>
 
-            {{-- signature: leaf-vein motif --}}
+                        {{-- signature: leaf-vein motif --}}
             <div class="flex justify-center">
-    <img src="{{ asset('images/logo.png') }}" alt="D'Green Rental" class="w-64 h-64 md:w-80 md:h-80 rounded-full">
-</div>
+                <img src="{{ asset('images/logo.png') }}" alt="D'Green Rental" class="w-64 h-64 md:w-72 md:h-72 rounded-full">
+            </div>
+        </div>
     </section>
 
     {{-- ===== STATUS RINGKAS ===== --}}
@@ -119,6 +120,42 @@
                 @endforeach
             </div>
         @endif
+    </section>
+
+        {{-- ===== LOKASI ===== --}}
+    <section id="lokasi" class="max-w-6xl mx-auto px-6 py-10">
+        <h2 class="font-display font-semibold text-2xl md:text-3xl mb-2">Lokasi Kami</h2>
+        <p class="text-[#4A5A50] mb-8">Datang langsung ke lokasi kami untuk melihat armada atau melakukan pengambilan unit.</p>
+
+        <div class="grid md:grid-cols-2 gap-6 items-stretch">
+            <div class="rounded-2xl overflow-hidden border border-[#E4DCC8] h-72 md:h-full min-h-[280px]">
+                <iframe
+                    src="https://www.google.com/maps?q=Gg.+Tj.+2,+Juwangen,+Purwomartani,+Kalasan,+Sleman,+Yogyakarta+55571&output=embed"
+                    class="w-full h-full border-0"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-[#E4DCC8] p-6 flex flex-col justify-center gap-4">
+                <div class="flex items-start gap-3">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6 text-[#3F7D4E] shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 21s-7-7.2-7-12a7 7 0 1 1 14 0c0 4.8-7 12-7 12z"/>
+                        <circle cx="12" cy="9" r="2.5"/>
+                    </svg>
+                    <p class="text-[#4A5A50] text-sm leading-relaxed">
+                        Gg. Tj. 2, Juwangen, Purwomartani, Kec. Kalasan, Sleman, Cupuwatu I,
+                        Purwomartani, Kec. Kalasan, Yogyakarta, Daerah Istimewa Yogyakarta 55571
+                    </p>
+                </div>
+
+                <a href="https://maps.app.goo.gl/3xRcgWwW99WtqvQG7?g_st=ic" target="_blank" rel="noopener"
+                   class="inline-flex items-center justify-center gap-2 bg-[#1F4430] text-white font-semibold px-5 py-3 rounded-full hover:bg-[#16321f] transition w-fit">
+                    Buka di Google Maps
+                </a>
+            </div>
+        </div>
     </section>
 
     {{-- ===== FOOTER ===== --}}
