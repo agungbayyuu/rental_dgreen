@@ -171,7 +171,7 @@ class TransaksiResource extends Resource
                     ->label('No. WhatsApp')
                     ->searchable(),
 
-                TextColumn::make('motor.nomor_polisi')
+                TextColumn::make('motor.motor')
                     ->label('Motor')
                     ->searchable()
                     ->sortable(),
@@ -188,6 +188,7 @@ class TransaksiResource extends Resource
 
                 TextColumn::make('harga')
                     ->label('Harga')
+                    ->money('IDR')
                     ->toggleable(),
 
                 // TextColumn::make('lokasi_ambil')
