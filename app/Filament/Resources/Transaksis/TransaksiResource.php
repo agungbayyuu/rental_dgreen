@@ -25,6 +25,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\HtmlString;
 use Filament\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class TransaksiResource extends Resource
 {
@@ -160,6 +161,7 @@ class TransaksiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            
             ->columns([
 
                 TextColumn::make('nama_customer')
@@ -213,7 +215,17 @@ class TransaksiResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
-            ]);
+            ])
+            ->filters([
+            SelectFilter::make('status')
+                ->label('Status')
+                ->options([
+                    'Dibooking' => 'Dibooking',
+                    'Berjalan'  => 'Berjalan',
+                    'Selesai'   => 'Selesai',
+                    'Batal'     => 'Batal',
+                ]),
+        ]);
     }
 
     public static function getRelations(): array
