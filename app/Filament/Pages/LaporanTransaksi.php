@@ -59,7 +59,7 @@ class LaporanTransaksi extends Page implements HasForms, HasTable
 
             Select::make('motor_id')
                 ->label('Motor')
-                ->options(Motor::pluck('nomor_polisi', 'id'))
+                ->options(Motor::pluck('motor', 'id'))
                 ->searchable()
                 ->live(),
 
