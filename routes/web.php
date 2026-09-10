@@ -12,3 +12,4 @@ Route::post('/sewa', [SewaController::class, 'store'])->name('sewa.store');
 use App\Http\Controllers\HomeController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::view('/investasi', 'investasi')->name('investasi');

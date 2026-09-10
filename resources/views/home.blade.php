@@ -24,10 +24,17 @@
                     <p class="text-xs text-[#D4B24C] tracking-wide">Sewa Motor Murah & Mudah</p>
                 </div>
             </div>
-            <a href="{{ route('sewa.create') }}"
-               class="hidden sm:inline-block bg-[#D4B24C] text-[#1F4430] font-semibold px-5 py-2 rounded-full hover:bg-[#e0c264] transition">
-                Sewa Sekarang
-            </a>
+
+            <div class="hidden sm:flex items-center gap-3">
+                <a href="{{ route('investasi') }}"
+                class="text-[#D4B24C] font-semibold px-5 py-2 rounded-full border border-[#D4B24C] hover:bg-[#D4B24C]/10 transition">
+                    Investasi
+                </a>
+                <a href="{{ route('sewa.create') }}"
+                class="bg-[#D4B24C] text-[#1F4430] font-semibold px-5 py-2 rounded-full hover:bg-[#e0c264] transition">
+                    Sewa Sekarang
+                </a>
+            </div>
         </div>
     </header>
 
