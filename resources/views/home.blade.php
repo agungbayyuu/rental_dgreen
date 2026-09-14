@@ -59,6 +59,10 @@
                        class="border border-[#D4B24C] text-[#D4B24C] font-semibold px-6 py-3 rounded-full hover:bg-[#D4B24C]/10 transition">
                         Ajukan Sewa
                     </a>
+                    <a href="{{ route('investasi') }}"
+                       class="bg-[#D4B24C] text-[#1F4430] font-semibold px-6 py-3 rounded-full hover:bg-[#e0c264] transition">
+                        Investasi
+                    </a>
                 </div>
             </div>
 
