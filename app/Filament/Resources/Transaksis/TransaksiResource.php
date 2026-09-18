@@ -131,16 +131,25 @@ class TransaksiResource extends Resource
                         ->default(fn ($record) => $record ? self::generateWhatsappMessage($record) : null)
                         ->extraInputAttributes(['id' => 'pesan-whatsapp-field'])
                         ->columnSpanFull()
-                        ->hintAction(
+                        ->hintActions([
                             Action::make('generate')
-                                ->label('Generate Ulang')
+                                ->label('Pesan Sewa')
                                 ->icon('heroicon-o-arrow-path')
                                 ->action(function ($set, $record) {
                                     if ($record) {
                                         $set('pesan_whatsapp', self::generateWhatsappMessage($record->fresh()));
                                     }
-                                })
-                        ),
+                                }),
+
+                            Action::make('generateReminder')
+                                ->label('Pesan Reminder')
+                                ->icon('heroicon-o-bell')
+                                ->action(function ($set, $record) {
+                                    if ($record) {
+                                        $set('pesan_whatsapp', self::generateReminderMessage($record->fresh()));
+                                    }
+                                }),
+                        ]),
                     Placeholder::make('aksi_pesan')
                         ->label('')
                         ->content(function ($record) {
@@ -303,6 +312,47 @@ class TransaksiResource extends Resource
         $pesan .= "BRI: Qris\n";
         $pesan .= "Setelah transfer, jangan lupa kabari ya.\n";
         $pesan .= "Terima kasih! 🙏";
+
+        return $pesan;
+    }
+        public static function generateReminderMessage(\App\Models\Transaksi $record): string
+    {
+        $mulai   = $record->tanggal_sewa;
+        $selesai = $record->tanggal_kembali;
+
+        // Nama depan saja: "Agung Prasetyo" -> "Agung"
+        $nama = ($record->nama_customer);
+
+        // Durasi sewa; "genap" hanya dipakai kalau durasinya bulat
+        $isBulanan = $record->periode === 'Bulanan';
+        $durasi    = $isBulanan ? $mulai->diffInMonths($selesai) : $mulai->diffInDays($selesai);
+        $satuan    = $isBulanan ? 'bulan' : 'hari';
+        $genap     = $durasi >= 1 && floor($durasi) == $durasi;
+
+        $awal = $genap
+            ? 'akan genap ' . (int) $durasi . " {$satuan} dan selesai"
+            : 'akan selesai';
+
+        // Bagian hari
+        $bagian = match (true) {
+            $selesai->hour < 11 => 'pagi',
+            $selesai->hour < 15 => 'siang',
+            $selesai->hour < 18 => 'sore',
+            default             => 'malam',
+        };
+
+        $kapan = match (true) {
+            $selesai->isToday()    => "nanti {$bagian}",
+            $selesai->isTomorrow() => "besok {$bagian}",
+            default                => 'tanggal ' . $selesai->translatedFormat('d F Y'),
+        };
+
+        $jam = $selesai->format('H.i');
+
+        $pesan  = "Halo Kak {$nama},\n";
+        $pesan .= "Sekadar mengingatkan, periode sewa motor Anda {$awal} {$kapan} pada pukul {$jam} WIB.\n\n";
+        $pesan .= "Mengenai unitnya, apakah berencana untuk diperpanjang atau dikembalikan ya, Kak?\n";
+        $pesan .= "Terima kasih. 🙂";
 
         return $pesan;
     }
