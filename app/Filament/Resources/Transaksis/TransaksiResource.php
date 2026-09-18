@@ -224,7 +224,8 @@ class TransaksiResource extends Resource
                     'Berjalan'  => 'Berjalan',
                     'Selesai'   => 'Selesai',
                     'Batal'     => 'Batal',
-                ]),
+                ])
+                 ->default('Berjalan'),
         ]);
     }
 
