@@ -107,6 +107,23 @@ class TransaksiResource extends Resource
                         ->label('Lokasi Ambil')
                         ->maxLength(255)
                         ->placeholder('Kosongkan jika kembali sendiri'),
+
+                    Select::make('periode')
+                        ->label('Periode')
+                        ->options([
+                            'Harian'  => 'Harian',
+                            'Bulanan' => 'Bulanan',
+                        ])
+                        ->placeholder('Tidak ditentukan')
+                        ->native(false),
+
+                    Textarea::make('catatan')
+                        ->label('Catatan Khusus')
+                        ->rows(3)
+                        ->maxLength(1000)
+                        ->placeholder('Contoh: helm 2, sudah DP 100rb, motor diantar ke bandara')
+                        ->columnSpanFull(),
+
                     Textarea::make('pesan_whatsapp')
                         ->label('Pesan untuk WhatsApp')
                         ->rows(12)
@@ -226,6 +243,23 @@ class TransaksiResource extends Resource
                     'Batal'     => 'Batal',
                 ])
                  ->default('Berjalan'),
+            
+            SelectFilter::make('periode')
+                ->label('Periode')
+                ->options([
+                    'Harian'   => 'Harian',
+                    'Bulanan'  => 'Bulanan',
+                    'kosong'   => 'Belum ditentukan',
+                ])
+                ->query(function ($query, array $data) {
+                    if (blank($data['value'])) {
+                        return $query;
+                    }
+
+                    return $data['value'] === 'kosong'
+                        ? $query->whereNull('periode')
+                        : $query->where('periode', $data['value']);
+                }),
         ]);
     }
 

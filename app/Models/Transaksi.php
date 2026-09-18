@@ -16,6 +16,8 @@ class Transaksi extends Model
         'lokasi_antar',
         'lokasi_ambil',
         'harga',
+        'catatan',
+        'periode',
         'status',
     ];
 
