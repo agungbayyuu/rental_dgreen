@@ -8,8 +8,12 @@ use App\Http\Controllers\SewaController;
 // });
 // routes/web.php
 Route::get('/sewa', [SewaController::class, 'create'])->name('sewa.create');
-Route::post('/sewa', [SewaController::class, 'store'])->name('sewa.store');
+// Route::post('/sewa', [SewaController::class, 'store'])->name('sewa.store');
 use App\Http\Controllers\HomeController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::view('/investasi', 'investasi')->name('investasi');
+
+  Route::post('/sewa', [SewaController::class, 'store'])
+      ->middleware('throttle:5,1') // maksimal 5 request per menit per IP
+      ->name('sewa.store');

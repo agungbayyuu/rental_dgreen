@@ -6,6 +6,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <title>Form Sewa Motor</title>
     @vite('resources/css/app.css')
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body class="bg-gray-50 min-h-screen py-10">
     <div class="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
@@ -98,6 +99,13 @@
                 <label class="block text-sm font-medium mb-1">Lokasi Ambil</label>
                 <input type="text" name="lokasi_ambil" value="{{ old('lokasi_ambil') }}"
                     class="w-full border rounded px-3 py-2">
+            </div>
+
+            <div>
+                <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                @error('g-recaptcha-response')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-medium">
