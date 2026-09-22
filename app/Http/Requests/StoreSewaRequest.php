@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\Recaptcha;
 use App\Models\Transaksi;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator; 
@@ -23,6 +24,7 @@ class StoreSewaRequest extends FormRequest
             'tanggal_kembali' => ['required', 'date', 'after_or_equal:tanggal_sewa'],
             'lokasi_antar'    => ['nullable', 'string', 'max:255'],
             'lokasi_ambil'    => ['nullable', 'string', 'max:255'],
+            'g-recaptcha-response' => ['required', new Recaptcha()],
         ];
     }
 
