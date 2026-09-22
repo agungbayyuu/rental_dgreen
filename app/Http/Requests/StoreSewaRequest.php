@@ -37,6 +37,7 @@ class StoreSewaRequest extends FormRequest
             'motor_id.exists'          => 'Motor yang dipilih tidak valid.',
             'tanggal_sewa.after_or_equal'    => 'Tanggal sewa tidak boleh sebelum hari ini.',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh sebelum tanggal sewa.',
+            'g-recaptcha-response.required' => 'Silakan centang captcha "Saya bukan robot" sebelum mengirim form.',
         ];
     }
     public function withValidator(Validator $validator): void

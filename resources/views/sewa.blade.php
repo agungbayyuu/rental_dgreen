@@ -23,6 +23,17 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+                <p class="font-semibold mb-1">Terjadi kesalahan:</p>
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded">
             <p class="font-semibold text-yellow-800 mb-1">Perhatian:</p>
             <p class="text-sm text-yellow-800">
