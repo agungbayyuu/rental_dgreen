@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Services;
 
+use Carbon\Carbon;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Filament\Resources\Services\Pages\ListServices;
@@ -102,8 +105,66 @@ class ServiceResource extends Resource
             ])
             ->defaultSort('tanggal_service', 'desc')
             ->filters([
-                //
-            ]);
+    Filter::make('periode')
+        ->label('Periode')
+        ->schema([
+            Select::make('bulan')
+                ->label('Bulan')
+                ->options([
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember',
+                ])
+                ->native(false)
+                ->placeholder('Semua Bulan')
+                ->default(now()->month),
+
+            Select::make('tahun')
+                ->label('Tahun')
+                ->options(
+                    collect(range(now()->year, now()->year - 5))
+                        ->mapWithKeys(fn ($year) => [$year => $year])
+                        ->all()
+                )
+                ->native(false)
+                ->default(now()->year),
+        ])
+        ->columns(2)
+        ->query(function (Builder $query, array $data): Builder {
+            return $query
+                ->when(
+                    $data['tahun'] ?? null,
+                    fn (Builder $q, $tahun) => $q->whereYear('tanggal_service', $tahun)
+                )
+                ->when(
+                    $data['bulan'] ?? null,
+                    fn (Builder $q, $bulan) => $q->whereMonth('tanggal_service', $bulan)
+                );
+        })
+        ->indicateUsing(function (array $data): array {
+            $indicators = [];
+
+            if ($data['bulan'] ?? null) {
+                $namaBulan = Carbon::create()->month((int) $data['bulan'])->locale('id')->translatedFormat('F');
+                $indicators[] = 'Bulan: ' . $namaBulan;
+            }
+
+            if ($data['tahun'] ?? null) {
+                $indicators[] = 'Tahun: ' . $data['tahun'];
+            }
+
+            return $indicators;
+        }),
+]);
     }
 
     public static function getRelations(): array
