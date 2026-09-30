@@ -22,13 +22,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script_stop: true
           script: |
-            cd /var/www/nama-project
-
-            php artisan down || true
-
-            git fetch origin
-            git checkout ${{ inputs.branch }}
-            git pull origin ${{ inputs.branch }}
+            cd /var/www/html/rental_dgreen
 
             npm run build
             php artisan optimize:clear
