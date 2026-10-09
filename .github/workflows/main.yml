@@ -27,6 +27,9 @@ jobs:
             git pull origin main
 
             npm run build
+            
+            php artisan migrate
+            
             php artisan optimize:clear
             php artisan optimize
             php artisan filament:optimize
