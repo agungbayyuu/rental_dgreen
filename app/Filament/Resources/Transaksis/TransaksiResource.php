@@ -107,6 +107,19 @@ class TransaksiResource extends Resource
                         ->label('Lokasi Ambil')
                         ->maxLength(255)
                         ->placeholder('Kosongkan jika kembali sendiri'),
+                    
+                    TextInput::make('helm')
+                        ->label('Jumlah Helm')
+                        ->numeric()
+                        ->minValue(0)
+                        ->nullable(),
+
+                    TextInput::make('jasa_antar')
+                        ->label('Jasa Antar')
+                        ->numeric()
+                        ->prefix('Rp')
+                        ->minValue(0)
+                        ->nullable(),
 
                     Select::make('periode')
                         ->label('Periode')

@@ -16,6 +16,8 @@ class Transaksi extends Model
         'lokasi_antar',
         'lokasi_ambil',
         'harga',
+        'helm',
+        'jasa_antar',
         'catatan',
         'periode',
         'status',
@@ -24,6 +26,8 @@ class Transaksi extends Model
     protected $casts = [
         'tanggal_sewa' => 'datetime',
         'tanggal_kembali' => 'datetime',
+        'helm' => 'integer',
+        'jasa_antar' => 'integer',
     ];
 
     public function motor(): BelongsTo

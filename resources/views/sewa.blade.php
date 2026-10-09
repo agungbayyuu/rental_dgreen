@@ -113,6 +113,18 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium mb-1">
+                    Jumlah Helm <span class="text-gray-400 font-normal">(opsional)</span>
+                </label>
+                <input type="number" name="helm" value="{{ old('helm') }}" min="0" inputmode="numeric"
+                    placeholder="Kosongkan jika tidak menyewa helm"
+                    class="w-full border rounded px-3 py-2 @error('helm') border-red-500 @enderror">
+                @error('helm')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                 @error('g-recaptcha-response')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
