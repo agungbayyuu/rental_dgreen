@@ -140,20 +140,31 @@ class TransaksiResource extends Resource
                     Textarea::make('pesan_whatsapp')
                         ->label('Pesan untuk WhatsApp')
                         ->rows(12)
-                        ->dehydrated(false) // tidak disimpan ke database, hanya tampilan sementara
+                        ->dehydrated(false)
                         ->default(fn ($record) => $record ? self::generateWhatsappMessage($record) : null)
                         ->extraInputAttributes(['id' => 'pesan-whatsapp-field'])
                         ->columnSpanFull()
+                        ->extraInputAttributes([
+                                'id' => 'pesan-whatsapp-field',
+                                'style' => 'font-family: ui-sans-serif, system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;',
+                            ])
                         ->hintActions([
                             Action::make('generate')
                                 ->label('Pesan Sewa')
                                 ->icon('heroicon-o-arrow-path')
-                                ->action(function ($set, $record) {
-                                    if ($record) {
-                                        $set('pesan_whatsapp', self::generateWhatsappMessage($record->fresh()));
+                                ->action(function ($set, $record, $livewire) {
+                                    if (! $record) {
+                                        return;
                                     }
-                                }),
 
+                                    // 1. Simpan inputan terbaru ke database (tanpa redirect)
+                                    $livewire->save(shouldRedirect: false);
+
+                                    // 2. Ambil data terbaru dari database, lalu generate pesan
+                                    $set('pesan_whatsapp', self::generateWhatsappMessage($record->fresh()));
+                                }),
+                        
+                        
                             Action::make('generateReminder')
                                 ->label('Pesan Reminder')
                                 ->icon('heroicon-o-bell')
@@ -177,14 +188,31 @@ class TransaksiResource extends Resource
                                         navigator.clipboard.writeText(text);
                                         alert('Pesan berhasil disalin!');
                                     },
-                                    sendWa() {
-                                        const text = document.getElementById('pesan-whatsapp-field').value;
-                                        window.open('https://wa.me/{$nomor}?text=' + encodeURIComponent(text), '_blank');
+                                    
+                                sendWa() {
+                                    const field = document.getElementById('pesan-whatsapp-field');
+
+                                    if (!field || !field.value.trim()) {
+                                        alert('Klik Pesan Sewa dulu untuk membuat pesan.');
+                                        return;
                                     }
+
+                                    const nomor = '{$nomor}';
+                                    const pesan = field.value;
+
+                                    const url = new URL('https://api.whatsapp.com/send/');
+                                    url.searchParams.set('phone', nomor);
+                                    url.searchParams.set('text', pesan);
+
+                                    console.log('Pesan:', pesan);
+                                    console.log('URL WhatsApp:', url.toString());
+
+                                    window.open(url.toString(), '_blank');
+                                }
                                 }">
                                     <button type="button" @click="copyText()"
                                         class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">
-                                        📋 Copy Pesan
+                                        &#128203; Copy Pesan
                                     </button>
                                     <button type="button" @click="sendWa()"
                                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
@@ -300,34 +328,56 @@ class TransaksiResource extends Resource
             'edit' => EditTransaksi::route('/{record}/edit'),
         ];
     }
-    public static function generateWhatsappMessage(\App\Models\Transaksi $record): string
-    {
-        $mulai   = $record->tanggal_sewa;
-        $selesai = $record->tanggal_kembali;
-        $durasiHari = max(1, $mulai->diffInDays($selesai));
+    
+public static function generateWhatsappMessage(\App\Models\Transaksi $record): string
+{
+    $mulai = $record->tanggal_sewa;
+    $selesai = $record->tanggal_kembali;
 
-        $pesan  = "📄 SP: Sewa Motor Harian\n";
-        $pesan .= "Nama : {$record->nama_customer}\n";
-        $pesan .= "Motor: {$record->motor->motor}\n";
-        $pesan .= "Plat : {$record->motor->nomor_polisi}\n";
-        $pesan .= "📅 Periode Sewa: " . $mulai->translatedFormat('d') . " - " . $selesai->translatedFormat('d F Y H:i') . " wib = {$durasiHari} hari\n";
-        $pesan .= "💰 Biaya Sewa: Rp " . number_format($record->harga, 0, ',', '.') . "\n";
-
-        if ($record->lokasi_antar) {
-            $pesan .= "📍 Lokasi Antar: {$record->lokasi_antar}\n";
-        }
-        if ($record->lokasi_ambil) {
-            $pesan .= "📍 Lokasi Ambil: {$record->lokasi_ambil}\n";
-        }
-
-        $pesan .= "Status pembayaran : \n"; // sengaja kosong, diisi manual oleh admin
-        $pesan .= "🔁 Transfer ke:\n";
-        $pesan .= "BRI: Qris\n";
-        $pesan .= "Setelah transfer, jangan lupa kabari ya.\n";
-        $pesan .= "Terima kasih! 🙏";
-
-        return $pesan;
+    if (!$mulai || !$selesai) {
+        throw new \InvalidArgumentException(
+            'Tanggal sewa dan tanggal kembali harus diisi.'
+        );
     }
+
+    $durasiHari = max(1, (int) $mulai->diffInDays($selesai));
+
+    $pesan = "\xF0\x9F\x93\x84 SP: Sewa Motor Harian\n";
+    $pesan .= "Nama : {$record->nama_customer}\n";
+    $pesan .= "Motor: {$record->motor->motor}\n";
+    $pesan .= "Plat : {$record->motor->nomor_polisi}\n\n";
+
+    $pesan .= "📅 Periode Sewa : "
+        . $mulai->translatedFormat('d')
+        . " - "
+        . $selesai->translatedFormat('d F Y H:i')
+        . " wib = {$durasiHari} hari\n";
+
+    $pesan .= "💰 Biaya Sewa : Rp "
+        . number_format($record->harga ?? 0, 0, ',', '.') . "\n";
+
+    $pesan .= "🚚 Jasa Antar : Rp "
+        . number_format($record->jasa_antar ?? 0, 0, ',', '.') . "\n";
+
+    $pesan .= "🪖 Helm : "
+        . number_format($record->helm ?? 0, 0, ',', '.') . " pcs\n";
+
+    if ($record->lokasi_antar) {
+        $pesan .= "📍 Lokasi Antar: {$record->lokasi_antar}\n";
+    }
+
+    if ($record->lokasi_ambil) {
+        $pesan .= "📍 Lokasi Ambil: {$record->lokasi_ambil}\n";
+    }
+
+    $pesan .= "\nStatus pembayaran : \n";
+    $pesan .= "🔁 Transfer ke:\n";
+    $pesan .= "BRI: Qris\n";
+    $pesan .= "Setelah transfer, jangan lupa kabari ya.\n";
+    $pesan .= "Terima kasih! 🙏";
+
+    return $pesan;
+}
         public static function generateReminderMessage(\App\Models\Transaksi $record): string
     {
         $mulai   = $record->tanggal_sewa;
