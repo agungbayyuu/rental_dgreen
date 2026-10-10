@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaksi extends Model
 {
+
+    public const HARGA_HELM = 5000;
+        
     protected $fillable = [
         'nama_customer',
         'no_whatsapp',
@@ -33,5 +36,17 @@ class Transaksi extends Model
     public function motor(): BelongsTo
     {
         return $this->belongsTo(Motor::class);
+    }
+
+    public function getBiayaHelmAttribute(): int
+    {
+        return (int) ($this->helm ?? 0) * self::HARGA_HELM;
+    }
+
+    public function getTotalBayarAttribute(): int
+    {
+        return (int) ($this->harga ?? 0)
+            + (int) ($this->jasa_antar ?? 0)
+            + $this->biaya_helm;
     }
 }
