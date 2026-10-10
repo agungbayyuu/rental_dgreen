@@ -12,6 +12,8 @@ class TransaksiPerMotor extends BaseWidget
 {
     protected static ?string $heading = 'Transaksi per Motor Bulan Ini';
 
+    protected int|string|array $columnSpan = 'full';
+
     public function table(Table $table): Table
     {
         $bulanIni = now()->month;

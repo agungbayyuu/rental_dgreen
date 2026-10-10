@@ -94,7 +94,13 @@ class TransaksiResource extends Resource
                         ->label('Harga Sewa')
                         ->numeric()
                         ->prefix('Rp')
-                        ->minValue(0)
+                        // ->minValue(0)
+                        ->datalist([
+                            '35000',
+                            '40000',
+                            '45000',
+                            '65000',
+                        ])
                         // ->required()
                         ->placeholder('150000'),
 
@@ -117,6 +123,16 @@ class TransaksiResource extends Resource
                     TextInput::make('jasa_antar')
                         ->label('Jasa Antar')
                         ->numeric()
+                        ->datalist([
+                            '5000',
+                            '8000',
+                            '10000',
+                            '13000',
+                            '15000',
+                            '20000',
+                            '25000',
+                            '30000',
+                        ])
                         ->prefix('Rp')
                         ->minValue(0)
                         ->nullable(),

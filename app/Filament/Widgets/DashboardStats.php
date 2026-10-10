@@ -16,9 +16,15 @@ class DashboardStats extends BaseWidget
 
         $totalMotor = Motor::count();
 
-        $totalTransaksiBulanIni = Transaksi::whereMonth('tanggal_sewa', $bulanIni)
-            ->whereYear('tanggal_sewa', $tahunIni)
-            ->count();
+        $transaksiBulanIni = Transaksi::whereMonth('tanggal_sewa', $bulanIni)
+            ->whereYear('tanggal_sewa', $tahunIni);
+
+        $totalTransaksiBulanIni = (clone $transaksiBulanIni)->count();
+
+        // Pendapatan = harga sewa + jasa antar
+        $totalPendapatanBulanIni = (clone $transaksiBulanIni)
+            ->selectRaw('COALESCE(SUM(harga), 0) + COALESCE(SUM(jasa_antar), 0) as total')
+            ->value('total');
 
         return [
             Stat::make('Total Motor', $totalMotor)
@@ -30,6 +36,11 @@ class DashboardStats extends BaseWidget
                 ->description(now()->translatedFormat('F Y'))
                 ->icon('heroicon-o-clipboard-document-list')
                 ->color('primary'),
+
+            Stat::make('Pendapatan Bulan Ini', 'Rp ' . number_format($totalPendapatanBulanIni, 0, ',', '.'))
+                ->description(now()->translatedFormat('F Y'))
+                ->icon('heroicon-o-banknotes')
+                ->color('warning'),
         ];
     }
 }

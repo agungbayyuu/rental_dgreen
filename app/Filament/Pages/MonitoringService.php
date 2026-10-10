@@ -1,24 +1,39 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Pages;
 
+use App\Filament\Widgets\ServiceStats; 
 use App\Filament\Resources\Services\ServiceResource; // sesuaikan namespace
 use App\Models\Motor;
 use App\Support\MotorServiceMonitor;
+use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 
-class MonitoringServiceTable extends BaseWidget
+class MonitoringService extends Page implements HasTable
 {
-    protected static ?string $heading = 'Monitoring Servis Motor';
-    protected static ?int $sort = 2;
-    protected int|string|array $columnSpan = 'full';
+    use InteractsWithTable;
 
-    protected static bool $isDiscovered = false;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+    protected static ?string $navigationLabel = 'Monitoring Servis';
+    protected static ?string $title = 'Monitoring Servis Motor';
+    protected static ?int $navigationSort = 2;
+
+    protected string $view = 'filament.pages.monitoring-service';
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ServiceStats::class,
+        ];
+    }
 
     public function table(Table $table): Table
     {
@@ -29,9 +44,9 @@ class MonitoringServiceTable extends BaseWidget
                     ->withMax('services as terakhir_service', 'tanggal_service')
             )
             ->columns([
-                TextColumn::make('nomor_polisi')
-                    ->label('Plat')
-                    ->searchable(),
+                // TextColumn::make('nomor_polisi')
+                //     ->label('Plat')
+                //     ->searchable(),
 
                 TextColumn::make('motor')
                     ->label('Motor')
@@ -103,7 +118,7 @@ class MonitoringServiceTable extends BaseWidget
                     ->size('xs')
                     ->url(fn (Motor $r) => ServiceResource::getUrl('create', ['motor_id' => $r->id])),
             ])
-            ->defaultSort('terakhir_service', 'asc') // servis paling lama di atas
+            ->defaultSort('terakhir_service', 'asc')
             ->paginated(false);
     }
 }

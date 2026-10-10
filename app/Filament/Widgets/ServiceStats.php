@@ -12,6 +12,8 @@ class ServiceStats extends StatsOverviewWidget
     protected static ?int $sort = 1;
     protected ?string $pollingInterval = null;
 
+    protected static bool $isDiscovered = false;
+
     protected function getStats(): array
     {
         $data = MotorServiceMonitor::all();
