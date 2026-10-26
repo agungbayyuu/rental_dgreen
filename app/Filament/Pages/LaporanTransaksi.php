@@ -2,20 +2,21 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\LaporanStats;
 use App\Models\Motor;
 use App\Models\Transaksi;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class LaporanTransaksi extends Page implements HasForms, HasTable
 {
@@ -34,9 +35,13 @@ class LaporanTransaksi extends Page implements HasForms, HasTable
 
     // State untuk filter
     public ?string $dari_tanggal = null;
+
     public ?string $sampai_tanggal = null;
+
     public ?int $motor_id = null;
+
     public ?string $status = null;
+
     public ?array $data = [];
 
     public function mount(): void
@@ -67,9 +72,9 @@ class LaporanTransaksi extends Page implements HasForms, HasTable
                 ->label('Status Transaksi')
                 ->options([
                     'Dibooking' => 'Dibooking',
-                    'Berjalan'  => 'Berjalan',
-                    'Selesai'   => 'Selesai',
-                    'Batal'     => 'Batal',
+                    'Berjalan' => 'Berjalan',
+                    'Selesai' => 'Selesai',
+                    'Batal' => 'Batal',
                 ])
                 ->live(),
         ];
@@ -102,14 +107,39 @@ class LaporanTransaksi extends Page implements HasForms, HasTable
                     ->label('Tgl Kembali')
                     ->date('d M Y'),
 
+                TextColumn::make('harga')
+                    ->label('Harga Sewa')
+                    ->money('IDR', locale: 'id'),
+
+                TextColumn::make('jasa_antar')
+                    ->label('Jasa Antar')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('-'),
+
+                TextColumn::make('helm')
+                    ->label('Helm')
+                    ->suffix(' pcs')
+                    ->placeholder('-'),
+
+                TextColumn::make('biaya_helm')
+                    ->label('Biaya Helm')
+                    ->state(fn ($record) => $record->biaya_helm)
+                    ->money('IDR', locale: 'id'),
+
+                TextColumn::make('total_bayar')
+                    ->label('Total')
+                    ->state(fn ($record) => $record->total_bayar)
+                    ->money('IDR', locale: 'id')
+                    ->weight('bold'),
+
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Dibooking' => 'warning',
-                        'Berjalan'  => 'info',
-                        'Selesai'   => 'success',
-                        'Batal'     => 'danger',
-                        default     => 'gray',
+                        'Berjalan' => 'info',
+                        'Selesai' => 'success',
+                        'Batal' => 'danger',
+                        default => 'gray',
                     }),
 
                 TextColumn::make('harga')
@@ -144,29 +174,69 @@ class LaporanTransaksi extends Page implements HasForms, HasTable
     }
 
     protected function hitungTotalHarga($record): int
-{
-    // Pastikan relasi motor ter-load
-    $motor = $record->motor;
-
-    if (! $motor) {
-        return 0;
-    }
-
-    $jumlahHari = Carbon::parse($record->tanggal_sewa)
-        ->diffInDays(Carbon::parse($record->tanggal_kembali)) + 1;
-
-    $hargaHarian = (int) $motor->harga_sewa_harian;
-
-    return $jumlahHari * $hargaHarian;
-    }
-
-    public function getTotalKeseluruhan(): int
     {
-        return $this->getFilteredQuery()->sum('harga');
+        // Pastikan relasi motor ter-load
+        $motor = $record->motor;
+
+        if (! $motor) {
+            return 0;
+        }
+
+        $jumlahHari = Carbon::parse($record->tanggal_sewa)
+            ->diffInDays(Carbon::parse($record->tanggal_kembali)) + 1;
+
+        $hargaHarian = (int) $motor->harga_sewa_harian;
+
+        return $jumlahHari * $hargaHarian;
     }
+
+    // public function getTotalKeseluruhan(): int
+    // {
+    //     return $this->getFilteredQuery()->sum('harga');
+    // }
 
     public function getJumlahTransaksi(): int
     {
         return $this->getFilteredQuery()->count();
     }
+    public function getTotalKeseluruhan(): int
+    {
+        return $this->getTotalHargaSewa()
+            + $this->getTotalJasaAntar()
+            + $this->getTotalBiayaHelm();
+    }
+
+    public function getTotalHargaSewa(): int
+    {
+        return (int) $this->getFilteredQuery()->sum('harga');
+    }
+
+    public function getTotalJasaAntar(): int
+    {
+        return (int) $this->getFilteredQuery()->sum('jasa_antar');
+    }
+
+    public function getTotalBiayaHelm(): int
+    {
+        return (int) $this->getFilteredQuery()->sum('helm') * Transaksi::HARGA_HELM;
+    }
+
+    protected function getHeaderWidgets(): array
+{
+    return [
+        LaporanStats::class,
+    ];
+}
+
+public function getHeaderWidgetsColumns(): int|array
+{
+    return 4;
+}
+
+public function getWidgetData(): array
+{
+    return [
+        'filters' => $this->data,
+    ];
+}
 }

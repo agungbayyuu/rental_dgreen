@@ -24,6 +24,7 @@ class StoreSewaRequest extends FormRequest
             'tanggal_kembali' => ['required', 'date', 'after_or_equal:tanggal_sewa'],
             'lokasi_antar'    => ['nullable', 'string', 'max:255'],
             'lokasi_ambil'    => ['nullable', 'string', 'max:255'],
+            'helm'            => ['nullable', 'integer', 'min:0', 'max:10'],
             'g-recaptcha-response' => ['required', new Recaptcha()],
         ];
     }
@@ -37,6 +38,9 @@ class StoreSewaRequest extends FormRequest
             'motor_id.exists'          => 'Motor yang dipilih tidak valid.',
             'tanggal_sewa.after_or_equal'    => 'Tanggal sewa tidak boleh sebelum hari ini.',
             'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh sebelum tanggal sewa.',
+            'helm.integer' => 'Jumlah helm harus berupa angka.',
+            'helm.min'     => 'Jumlah helm tidak boleh kurang dari 0.',
+            'helm.max'     => 'Jumlah helm maksimal 10.',
             'g-recaptcha-response.required' => 'Silakan centang captcha "Saya bukan robot" sebelum mengirim form.',
         ];
     }
