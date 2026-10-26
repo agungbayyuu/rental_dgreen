@@ -21,6 +21,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 
 class ServiceResource extends Resource
 {
@@ -105,6 +106,14 @@ class ServiceResource extends Resource
             ])
             ->defaultSort('tanggal_service', 'desc')
             ->filters([
+
+            SelectFilter::make('motor_id')
+                ->label('Motor')
+                ->relationship('motor', 'motor')   // relasi, kolom yang ditampilkan
+                ->searchable()
+                ->preload()
+                ->native(false)
+                ->placeholder('Semua Motor'),
     Filter::make('periode')
         ->label('Periode')
         ->schema([
