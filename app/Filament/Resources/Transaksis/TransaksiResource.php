@@ -345,55 +345,87 @@ class TransaksiResource extends Resource
         ];
     }
     
-public static function generateWhatsappMessage(\App\Models\Transaksi $record): string
-{
-    $mulai = $record->tanggal_sewa;
-    $selesai = $record->tanggal_kembali;
+    public static function generateWhatsappMessage(\App\Models\Transaksi $record): string
+    {
+        $hargaHelmPerPcs = 5000;
 
-    if (!$mulai || !$selesai) {
-        throw new \InvalidArgumentException(
-            'Tanggal sewa dan tanggal kembali harus diisi.'
-        );
+        $mulai = $record->tanggal_sewa;
+        $selesai = $record->tanggal_kembali;
+
+        if (!$mulai || !$selesai) {
+            throw new \InvalidArgumentException(
+                'Tanggal sewa dan tanggal kembali harus diisi.'
+            );
+        }
+
+        $durasiHari = max(1, (int) $mulai->diffInDays($selesai));
+
+        // Perhitungan biaya
+        $biayaSewa  = (int) ($record->harga ?? 0);
+        $jasaAntar  = (int) ($record->jasa_antar ?? 0);
+        $jumlahHelm = (int) ($record->helm ?? 0);
+        $biayaHelm  = $jumlahHelm * $hargaHelmPerPcs;
+        $total      = $biayaSewa + $jasaAntar + $biayaHelm;
+
+        $rp = fn (int $angka): string => 'Rp ' . number_format($angka, 0, ',', '.');
+
+        // Header
+        $pesan  = "📄 SP: Sewa Motor Harian\n\n";
+        $pesan .= "Nama : {$record->nama_customer}\n";
+        $pesan .= "Motor: {$record->motor->motor}\n";
+        $pesan .= "Plat : {$record->motor->nomor_polisi}\n\n";
+
+        // Periode
+        $pesan .= "📅 Periode Sewa : "
+            . $mulai->translatedFormat('d')
+            . " - "
+            . $selesai->translatedFormat('d F Y H:i')
+            . " wib = {$durasiHari} hari\n\n";
+
+        // Rincian biaya
+        $pesan .= "💰 Biaya Sewa : {$rp($biayaSewa)}\n";
+        $pesan .= "🚚 Jasa Antar : {$rp($jasaAntar)}\n";
+        $pesan .= "🪖 Helm : {$jumlahHelm} pcs {$rp($biayaHelm)}\n";
+        $pesan .= "☯️ Total Pembayaran : {$rp($total)}\n\n";
+
+        // Lokasi
+        $adaLokasi = false;
+
+        if ($record->lokasi_antar) {
+            $pesan .= "📍 Lokasi Antar: {$record->lokasi_antar}\n";
+            $adaLokasi = true;
+        }
+
+        if ($record->lokasi_ambil) {
+            $pesan .= "📍 Lokasi Ambil: {$record->lokasi_ambil}\n";
+            $adaLokasi = true;
+        }
+
+        if ($adaLokasi) {
+            $pesan .= "\n";
+        }
+
+        // Status pembayaran
+        $dp = (int) ($record->dp ?? 0);
+
+        if ($dp >= $total && $total > 0) {
+            $status = 'Lunas';
+        } elseif ($dp > 0) {
+            $status = "Dp {$rp($dp)}";
+        } else {
+            $status = 'Belum dibayar';
+        }
+
+        $pesan .= "Status pembayaran : {$status}\n\n";
+
+        // Footer
+        $pesan .= "🔁 Transfer ke:\n";
+        $pesan .= "BRI: Qris\n";
+        $pesan .= "Setelah transfer, jangan lupa kabari ya.\n";
+        $pesan .= "Terima kasih! 🙏";
+
+        return $pesan;
     }
-
-    $durasiHari = max(1, (int) $mulai->diffInDays($selesai));
-
-    $pesan = "\xF0\x9F\x93\x84 SP: Sewa Motor Harian\n";
-    $pesan .= "Nama : {$record->nama_customer}\n";
-    $pesan .= "Motor: {$record->motor->motor}\n";
-    $pesan .= "Plat : {$record->motor->nomor_polisi}\n\n";
-
-    $pesan .= "📅 Periode Sewa : "
-        . $mulai->translatedFormat('d')
-        . " - "
-        . $selesai->translatedFormat('d F Y H:i')
-        . " wib = {$durasiHari} hari\n";
-
-    $pesan .= "💰 Biaya Sewa : Rp "
-        . number_format($record->harga ?? 0, 0, ',', '.') . "\n";
-
-    $pesan .= "🚚 Jasa Antar : Rp "
-        . number_format($record->jasa_antar ?? 0, 0, ',', '.') . "\n";
-
-    $pesan .= "🪖 Helm : "
-        . number_format($record->helm ?? 0, 0, ',', '.') . " pcs\n";
-
-    if ($record->lokasi_antar) {
-        $pesan .= "📍 Lokasi Antar: {$record->lokasi_antar}\n";
-    }
-
-    if ($record->lokasi_ambil) {
-        $pesan .= "📍 Lokasi Ambil: {$record->lokasi_ambil}\n";
-    }
-
-    $pesan .= "\nStatus pembayaran : \n";
-    $pesan .= "🔁 Transfer ke:\n";
-    $pesan .= "BRI: Qris\n";
-    $pesan .= "Setelah transfer, jangan lupa kabari ya.\n";
-    $pesan .= "Terima kasih! 🙏";
-
-    return $pesan;
-}
         public static function generateReminderMessage(\App\Models\Transaksi $record): string
     {
         $mulai   = $record->tanggal_sewa;
@@ -428,9 +460,9 @@ public static function generateWhatsappMessage(\App\Models\Transaksi $record): s
 
         $jam = $selesai->format('H.i');
 
-        $pesan  = "Halo Kak {$nama},\n";
-        $pesan .= "Sekadar mengingatkan, periode sewa motor Anda {$awal} {$kapan} pada pukul {$jam} WIB.\n\n";
-        $pesan .= "Mengenai unitnya, apakah berencana untuk diperpanjang atau dikembalikan ya, Kak?\n";
+        $pesan  = "Halo Kak {$nama},\n\n";
+        $pesan .= "Sekadar mengingatkan, periode sewa motor Anda {$awal} {$kapan} pada pukul {$jam} WIB.\n";
+        $pesan .= "Mengenai unitnya, apakah berencana untuk diperpanjang atau dikembalikan ya, Kak?\n\n";
         $pesan .= "Terima kasih. 🙂";
 
         return $pesan;

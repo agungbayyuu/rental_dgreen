@@ -67,7 +67,7 @@ class MotorResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('motors')
-                            ->visibility('public')
+                            ->visibility('private')
                             ->imageEditor()
                             ->imagePreviewHeight('150')
                             ->maxSize(2048)
