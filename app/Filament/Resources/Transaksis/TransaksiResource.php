@@ -39,6 +39,32 @@ class TransaksiResource extends Resource
     {
     return $schema
             ->schema([
+
+                        Placeholder::make('info_perpanjangan')
+                            ->label('')
+                            ->visible(fn ($record) => $record && ($record->perpanjangan_dari_id || $record->perpanjangans()->exists()))
+                            ->content(function ($record) {
+                                // Halaman Create: belum ada record
+                                if (! $record) {
+                                    return null;
+                                }
+
+                                $html = '';
+
+                                if ($record->perpanjangan_dari_id) {
+                                    $url = static::getUrl('edit', ['record' => $record->perpanjangan_dari_id]);
+                                    $html .= "<div>🔁 Perpanjangan dari <a href=\"{$url}\" class=\"text-primary-600 underline\">transaksi #{$record->perpanjangan_dari_id}</a></div>";
+                                }
+
+                                foreach ($record->perpanjangans ?? [] as $p) {
+                                    $url = static::getUrl('edit', ['record' => $p->id]);
+                                    $html .= "<div>➡️ Diperpanjang menjadi <a href=\"{$url}\" class=\"text-primary-600 underline\">transaksi #{$p->id}</a> ({$p->tanggal_sewa->format('d/m H:i')} - {$p->tanggal_kembali->format('d/m H:i')})</div>";
+                                }
+
+                                return new HtmlString($html);
+                            })
+                            ->columnSpanFull(),
+
                         TextInput::make('nama_customer')
                             ->label('Nama Customer')
                             ->required()
