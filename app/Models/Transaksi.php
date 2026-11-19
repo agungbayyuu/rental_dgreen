@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Transaksi extends Model
 {
@@ -53,5 +55,9 @@ class Transaksi extends Model
     public function transaksiAsal(): BelongsTo
     {
         return $this->belongsTo(self::class, 'perpanjangan_dari_id');
+    }
+    public function perpanjangans(): HasMany
+    {
+        return $this->hasMany(self::class, 'perpanjangan_dari_id');
     }
 }
