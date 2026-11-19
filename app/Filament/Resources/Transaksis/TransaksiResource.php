@@ -26,6 +26,8 @@ use Filament\Forms\Components\Placeholder;
 use Illuminate\Support\HtmlString;
 use Filament\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Actions\PerpanjangTransaksiAction;
+use Filament\Actions\EditAction;
 
 class TransaksiResource extends Resource
 {
@@ -252,6 +254,24 @@ class TransaksiResource extends Resource
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('perpanjangan')
+                    ->label('Perpanjangan')
+                    ->badge()
+                    ->icon(fn (Transaksi $record) => match (true) {
+                        (bool) $record->perpanjangan_dari_id => 'heroicon-m-arrow-uturn-right',
+                        (bool) $record->perpanjangans_exists => 'heroicon-m-arrow-path',
+                        default                              => null,
+                    })
+                    ->state(fn (Transaksi $record) => match (true) {
+                        (bool) $record->perpanjangan_dari_id => "Lanjutan dari #{$record->perpanjangan_dari_id}",
+                        (bool) $record->perpanjangans_exists => 'Sudah diperpanjang',
+                        default                              => null,
+                    })
+                    ->color(fn (Transaksi $record) => $record->perpanjangan_dari_id ? 'info' : 'gray')
+                    ->url(fn (Transaksi $record) => $record->perpanjangan_dari_id
+                        ? static::getUrl('edit', ['record' => $record->perpanjangan_dari_id])
+                        : null),
+
                 TextColumn::make('no_whatsapp')
                     ->label('No. WhatsApp')
                     ->searchable(),
@@ -326,6 +346,10 @@ class TransaksiResource extends Resource
                         ? $query->whereNull('periode')
                         : $query->where('periode', $data['value']);
                 }),
+                // ->recordActions([
+                //     EditAction::make(),
+                //     PerpanjangTransaksiAction::make(),
+                // ])
         ]);
     }
 

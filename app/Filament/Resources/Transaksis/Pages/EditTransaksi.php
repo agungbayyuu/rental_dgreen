@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Transaksis\Pages;
 use App\Filament\Resources\Transaksis\TransaksiResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Actions\PerpanjangTransaksiAction;
+
 
 class EditTransaksi extends EditRecord
 {
@@ -14,6 +16,7 @@ class EditTransaksi extends EditRecord
     {
         return [
             DeleteAction::make(),
+            PerpanjangTransaksiAction::make(),
         ];
     }
 

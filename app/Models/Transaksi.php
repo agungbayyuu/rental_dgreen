@@ -12,6 +12,7 @@ class Transaksi extends Model
         
     protected $fillable = [
         'nama_customer',
+        'perpanjangan_dari_id',
         'no_whatsapp',
         'motor_id',
         'tanggal_sewa',
@@ -48,5 +49,9 @@ class Transaksi extends Model
         return (int) ($this->harga ?? 0)
             + (int) ($this->jasa_antar ?? 0)
             + $this->biaya_helm;
+    }
+    public function transaksiAsal(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'perpanjangan_dari_id');
     }
 }

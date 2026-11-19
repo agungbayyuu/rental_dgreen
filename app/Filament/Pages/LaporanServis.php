@@ -82,9 +82,14 @@ class LaporanServis extends Page implements HasForms, HasTable
                     ->date('d M Y')
                     ->sortable(),
 
-                IconColumn::make('servis_oli')
+                TextColumn::make('servis_oli')
                     ->label('Ganti Oli')
-                    ->boolean(),
+                    ->badge()
+                    ->color(fn (?string $state) => match ($state) {
+                        'Oli Mesin' => 'warning',
+                        'Oli Mesin & Gardan' => 'success',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('catatan')
                     ->label('Catatan')

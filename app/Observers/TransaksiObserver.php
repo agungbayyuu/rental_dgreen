@@ -33,17 +33,7 @@ class TransaksiObserver
 
     protected function syncMotorStatus(Transaksi $transaksi): void
     {
-        $motor = $transaksi->motor;
-
-        if (! $motor) {
-            return;
-        }
-
-        $motor->update([
-            'status' => $transaksi->status === 'Berjalan'
-                ? 'Disewa'
-                : 'Tersedia',
-        ]);
+        $this->refreshMotorStatus($transaksi->motor_id);
     }
 
     protected function refreshMotorStatus(?int $motorId): void
